@@ -11,8 +11,9 @@ export const AuthContextProvider = ({ children }) => {
   const googleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider)
-      .then((result) => {
+      .then((response) => {
         setError(null);
+        localStorage.setItem("Auth Token", response._tokenResponse.refreshToken);
       })
       .catch((error) => {
         setError(error.message);
@@ -24,6 +25,7 @@ export const AuthContextProvider = ({ children }) => {
       .then(() => {
         setUser(null);
         setError(null);
+        localStorage.removeItem("Auth Token");
       })
       .catch((error) => {
         setError(error);
@@ -32,13 +34,17 @@ export const AuthContextProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser !== null) {
+      if (currentUser) {
         const uid = currentUser.uid;
         const displayName = currentUser.displayName;
         const email = currentUser.email;
         const photoURL = currentUser.photoURL;
         const emailVerified = currentUser.emailVerified;
         setUser({ uid, displayName, email, photoURL, emailVerified });
+        localStorage.setItem("Auth Token", currentUser.auth.currentUser.stsTokenManager.refreshToken);
+      } else {
+        setUser(null);
+        localStorage.removeItem("Auth Token");
       }
     });
 

@@ -1,23 +1,18 @@
-import React, { useEffect } from "react";
-import { Navigate, Routes } from "react-router-dom";
+import React from "react";
+import { Routes } from "react-router-dom";
 import { Route } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 import { privateRoutes, publicRoutes } from "./../routes";
 import Layout from "./Layout";
-import { HOME_ROUTE } from "./../utils/consts";
-import Home from "../pages/Home";
-import RequireAuth from "./../hoc/RequireAuth";
 
 function AppRouter() {
+  let authToken = localStorage.getItem("Auth Token");
   const { user } = UserAuth();
-  console.log(user);
-  useEffect(() => {}, [user]);
   return (
     <Routes>
       <Route element={<Layout />}>
-        {privateRoutes.map(({ path, element }) => (
-          <Route key={path} path={path} element={<RequireAuth>{element}</RequireAuth>} />
-        ))}
+        {(authToken || user) &&
+          privateRoutes.map(({ path, element }) => <Route key={path} path={path} element={element} />)}
         {publicRoutes.map(({ path, element }) => (
           <Route key={path} path={path} element={element} />
         ))}
